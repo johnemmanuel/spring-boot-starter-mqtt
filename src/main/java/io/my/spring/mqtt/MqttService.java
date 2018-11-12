@@ -6,9 +6,10 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -18,14 +19,29 @@ public class MqttService {
 
         private Object object;
         private Method method;
+        private MqttTopicTemplate template;
 
-        MqttMessageListener(Object object, Method method) {
+        MqttMessageListener(MqttTopicTemplate template, Object object, Method method) {
+            this.template = template;
             this.object = object;
             this.method = method;
         }
 
         public void messageArrived(String topic, MqttMessage message) throws Exception {
-            method.invoke(object, topic, message);
+            Map<String, String> map = template.match(topic);
+            Parameter[] parameters = method.getParameters();
+            Object[] params = new Object[method.getParameterCount()];
+            for (int i=0;i<params.length;i++) {
+                String name = parameters[i].getName();
+                if (name.equals("topic")) {
+                    params[i] = topic;
+                } else if (name.equals("message")) {
+                    params[i] = message;
+                } else {
+                    params[i] = map.getOrDefault(parameters[i].getName(), null);
+                }
+            }
+            method.invoke(object, params);
         }
     }
 
@@ -39,9 +55,10 @@ public class MqttService {
                 if (method.isAnnotationPresent(MqttTopic.class)) {
                     MqttTopic topic = method.getAnnotation(MqttTopic.class);
                     log.info("Topic Found: {}, Qos: {}", topic.value(), topic.qos());
+                    MqttTopicTemplate template = new MqttTopicTemplate(topic.value());
                     mqttClient.subscribe(
-                            topic.value(),
-                            new MqttMessageListener(object, method));
+                            template.getFilter(),
+                            new MqttMessageListener(template, object, method));
                 }
             }
         }
