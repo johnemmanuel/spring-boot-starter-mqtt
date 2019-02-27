@@ -1,0 +1,36 @@
+# The default configuration connects to the publicly available MQTT broker at test.mosquitto.org
+# Default config also establishes an unencrypted connection. To use an encrypted connection
+#    change the protocol to SSL and set the ca-certificate-available prop to true
+spring:
+    mqtt:
+        # Protocol can be TCP or SSL
+        protocol: tcp
+        # MQTT Server Host
+        broker-host: test.mosquitto.org
+        # MQTT Server Port
+        broker-port: 1883
+        # Client Id will default to a random value. Uncomment next line to set a custom value
+        # client-id: custom-mqtt-tester
+        # Username for the connection
+        username:
+        # Password for the connection
+        password:
+        # Connection timeout
+        timeout: 30
+        # Keep alive in seconds
+        keep-alive: 60
+        # MQTT Connect Options
+        clean-session: true
+        auto-reconnect: false
+        # Value 4 represents MQTT 3.1.1
+        version: 4
+        # CA Certificate won't be used by default
+        ca-certificate-available: false
+        ca-cert-file-path: mosquitto.org.crt
+        # Client Certificate won't be used by default
+        client-certificate-available: false
+        client-cert-file-path: 
+        client-key-file-path: 
+        client-key-file-password: 
+        # Specify the TLS Version to be used
+        tls-version: "TLSv1.2"

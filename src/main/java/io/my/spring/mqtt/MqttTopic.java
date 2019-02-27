@@ -1,16 +1,25 @@
 package io.my.spring.mqtt;
 
-import lombok.Getter;
-
 import java.lang.annotation.*;
-import java.util.regex.Pattern;
 
+/**
+ *
+ * @author John
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface MqttTopic {
+
+    /**
+     *
+     * @return
+     */
     String value() default "/";
+
+    /**
+     *
+     * @return
+     */
     int qos() default 0;
 }
-
-
