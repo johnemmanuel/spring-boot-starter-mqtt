@@ -13,12 +13,10 @@ import java.util.regex.Pattern;
 /topic1/{param1}/{param2} match /topic1/+/+
 /topic2/<path1> math /topic2/#
  */
-
 /**
  *
  * @author John
  */
-
 public class MqttTemplate {
 
     private static final Pattern PATTERN_PARAMETER = Pattern.compile("\\{(.+?)\\}");
@@ -46,16 +44,16 @@ public class MqttTemplate {
     }
 
     /**
+     * Converts a String of the format /{1}/{2}/{3}/<param> to a Map with elements 1:{1}, 2:{2}, 3:{3}
      *
      * @param topic
-     * @return
+     * @return map
      */
     public Map<String, String> match(String topic) {
         Matcher matcher = matchPattern.matcher(topic);
         if (matcher.matches()) {
             Map<String, String> result = new HashMap<>();
             for (int i = 1; i <= matcher.groupCount(); i++) {
-                System.out.println(matcher.group(i));
                 if (i - 1 < SINGLE_PARAMETERS.size()) {
                     result.put(SINGLE_PARAMETERS.get(i - 1), matcher.group(i));
                 } else {
@@ -68,45 +66,46 @@ public class MqttTemplate {
         }
     }
 
-    private void validateFilter() {
+    final void validateFilter() {
         //@TODO Validate filter
         valid = true;
     }
 
-    private void buildFilter() {
+    final void buildFilter() {
         Matcher paramMatcher = PATTERN_PARAMETER.matcher(template);
         StringBuffer filterBuffer = new StringBuffer();
         while (paramMatcher.find()) {
             paramMatcher.appendReplacement(filterBuffer, "+");
             SINGLE_PARAMETERS.add(paramMatcher.group(1));
         }
-
         paramMatcher.appendTail(filterBuffer);
+        
         Matcher pathMatcher = PATTERN_PATH.matcher(filterBuffer.toString());
-
         filterBuffer = new StringBuffer();
         while (pathMatcher.find()) {
             pathMatcher.appendReplacement(filterBuffer, "#");
             pathParameter = pathMatcher.group(1);
         }
         pathMatcher.appendTail(filterBuffer);
+        
         filter = filterBuffer.toString();
     }
 
-    private void buildMatchPattern() {
+    final void buildMatchPattern() {
         Matcher paramMatcher = PATTERN_PARAMETER.matcher(template);
         StringBuffer sbPattern = new StringBuffer();
         while (paramMatcher.find()) {
             paramMatcher.appendReplacement(sbPattern, "(.+?)");
         }
-
         paramMatcher.appendTail(sbPattern);
+        
         Matcher pathMatcher = PATTERN_PATH.matcher(sbPattern.toString());
         sbPattern = new StringBuffer();
         while (pathMatcher.find()) {
             pathMatcher.appendReplacement(sbPattern, "(.+?)");
         }
         pathMatcher.appendTail(sbPattern);
+        
         matchPattern = Pattern.compile(sbPattern.toString());
     }
 }
