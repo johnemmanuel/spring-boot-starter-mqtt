@@ -1,2 +1,2 @@
-# mqtt-spring-boot-starter
-mqtt-spring-boot-starter
+# spring-boot-starter-mqtt
+spring-boot-starter-mqtt
